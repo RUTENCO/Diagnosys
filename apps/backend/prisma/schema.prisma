@@ -1,0 +1,73 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  password  String
+  role      Role     @default(EMPRESA)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // campo inverso para las ExternalForce que pertenezcan a este usuario
+  externalForces ExternalForce[]
+}
+
+enum Role {
+  ADMIN
+  CONSULTOR
+  EMPRESA
+}
+
+model ExternalForce {
+  id        String        @id @default(cuid())
+  name      String
+  category  ForceCategory
+  ownerId   String?
+  owner     User?         @relation(fields: [ownerId], references: [id])
+  createdAt DateTime      @default(now())
+}
+
+enum ForceCategory {
+  TENDENCIAS
+  MERCADO
+  INDUSTRIA
+  MACRO
+}
+
+model Selection {
+  id        String   @id @default(cuid())
+  userId    String
+  forceId   String
+  impact    Impact?
+  category  Tag?
+  createdAt DateTime @default(now())
+
+  @@unique([userId, forceId])
+}
+
+enum Impact {
+  ALTO
+  MEDIO
+  BAJO
+}
+
+enum Tag {
+  OPORTUNIDAD
+  NECESIDAD
+  PROBLEMA
+}

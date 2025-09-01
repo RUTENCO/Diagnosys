@@ -1,0 +1,15 @@
+FROM node:20-alpine
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm install
+
+COPY . .
+
+# Generar Prisma Client
+RUN npx prisma generate
+
+EXPOSE 3001
+
+# Ejecutar migraciones antes de arrancar NestJS
+CMD npx prisma migrate deploy && npm run start:dev
